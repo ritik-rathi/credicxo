@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:movies_bloc_task/bloc/getDetails.dart';
 import 'package:movies_bloc_task/bloc/getMovies.dart';
 import 'package:movies_bloc_task/model/movies.dart';
 import 'package:movies_bloc_task/model/moviesResponse.dart';
+import 'package:movies_bloc_task/ui/detailScreen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -57,7 +59,15 @@ class _HomeScreenState extends State<HomeScreen> {
         itemCount: movies.length,
         itemBuilder: (context, index) {
           return GestureDetector(
-            onTap: () {},
+            onTap: () {
+              detailBloc.getDetails(movies[index].id);
+              print('Details received');
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          DetailScreen(id: movies[index].id)));
+            },
             child: Row(
               children: <Widget>[
                 Padding(
