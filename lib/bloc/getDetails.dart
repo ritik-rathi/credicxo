@@ -13,7 +13,8 @@ class DetailBloc {
   }
 
   dispose() {
-    _subject.close();
+    _subject.sink.add(DetailsResponse(details: [], error: ""));
+    _subject.drain();
   }
 
   BehaviorSubject<DetailsResponse> get subject => _subject;

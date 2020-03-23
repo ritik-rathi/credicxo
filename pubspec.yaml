@@ -26,6 +26,10 @@ dependencies:
   dio: ^3.0.9
   rxdart: ^0.23.1
   http: 0.12.0+4
+  connectivity: 0.4.8+2
+  equatable: ^1.1.1
+  flutter_bloc: ^3.2.0
+  bloc: ^3.0.0
 
 dev_dependencies:
   flutter_test:
