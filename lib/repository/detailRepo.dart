@@ -18,4 +18,28 @@ class DetailRepo {
       return DetailsResponse.withError("$error");
     }
   }
+
+  Future<CastResponse> getCast(int id) async {
+    var params = {"api_key": apiKey, "language": "en-US", "page:": 1};
+    try {
+      Response response =
+          await _dio.get("$mainUrl/movie/$id/credits", queryParameters: params);
+      return CastResponse.fromJson(response.data);
+    } catch (error, stackTrace) {
+      print('Exception occured: $error stacktrace: $stackTrace');
+      return CastResponse.withError("$error");
+    }
+  }
+
+  Future<GenreResponse> getGenre(int id) async {
+    var params = {"api_key": apiKey, "language": "en-US", "page:": 1};
+    try {
+      Response response =
+          await _dio.get("$mainUrl/movie/$id", queryParameters: params);
+      return GenreResponse.fromJson(response.data);
+    } catch (error, stackTrace) {
+      print('Exception occured: $error stacktrace: $stackTrace');
+      return GenreResponse.withError("$error");
+    }
+  }
 }

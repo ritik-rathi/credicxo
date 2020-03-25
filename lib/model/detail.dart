@@ -10,3 +10,23 @@ class Details {
         name = json["name"],
         site = json["site"];
 }
+
+class Cast {
+  final String name;
+  final String image;
+
+  Cast(this.image, this.name);
+
+  Cast.fromJson(Map<String, dynamic> json)
+    : name = json["name"],
+      image = json["profile_path"];
+}
+
+class Genre {
+  final String genre;
+
+  Genre(this.genre);
+
+  Genre.fromJson(Map<String, dynamic> json)
+    : genre = json["name"];
+}

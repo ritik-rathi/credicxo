@@ -6,7 +6,8 @@ import 'package:movies_bloc_task/model/detailsResponse.dart';
 
 class DetailScreen extends StatefulWidget {
   final int id;
-  DetailScreen({this.id});
+  final String name, img;
+  DetailScreen({this.id, this.img, this.name});
   @override
   _DetailScreenState createState() => _DetailScreenState();
 }
@@ -38,38 +39,96 @@ class _DetailScreenState extends State<DetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async => false,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text('Detail Screen'),
-          leading: IconButton(
-              icon: Icon(Icons.arrow_back),
-              onPressed: () {
-                detailBloc.dispose();
-                Navigator.pop(context);
-              }),
-        ),
-        body: network == 1
-            ? StreamBuilder<DetailsResponse>(
-                stream: detailBloc.subject.stream,
-                builder: (context, AsyncSnapshot<DetailsResponse> snapshot) {
-                  if (snapshot.hasData) {
-                    if (snapshot.data.error != null &&
-                        snapshot.data.error.length > 0) {
-                      return _errorWidget(snapshot.data.error);
-                    }
-                    return _movieDetail(snapshot.data);
-                  } else if (snapshot.hasError) {
-                    return _errorWidget(snapshot.error);
-                  } else {
-                    return Center(child: Text('Loading...'));
-                  }
-                },
-              )
-            : Center(child: Text('Oops! Check your internet connection.')),
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        title: Text(widget.name),
+        leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              detailBloc.dispose();
+              Navigator.pop(context);
+            }),
       ),
+      body: network == 1
+          ? Container(
+              child: ListView(
+                children: <Widget>[
+                  Container(
+                    height: MediaQuery.of(context).size.height / 2.5,
+                    width: double.infinity,
+                    child: Image(
+                        image: NetworkImage(widget.img), fit: BoxFit.cover),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                      child: Text('Genre - ',
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                  Container(
+                    child: StreamBuilder<GenreResponse>(
+                      stream: detailBloc.genre.stream,
+                      builder:
+                          (context, AsyncSnapshot<GenreResponse> snapshot) {
+                        if (snapshot.hasData) {
+                          if (snapshot.data.error != null &&
+                              snapshot.data.error.length > 0) {
+                            return _errorWidget(snapshot.data.error);
+                          }
+                          return _getGenre(snapshot.data);
+                        } else if (snapshot.hasError) {
+                          return _errorWidget(snapshot.error);
+                        } else {
+                          return Center(child: CircularProgressIndicator());
+                        }
+                      },
+                    ),
+                  ),
+                  Container(
+                    height: 120,
+                    child: StreamBuilder<CastResponse>(
+                      stream: detailBloc.cast.stream,
+                      builder: (context, AsyncSnapshot<CastResponse> snapshot) {
+                        if (snapshot.hasData) {
+                          if (snapshot.data.error != null &&
+                              snapshot.data.error.length > 0) {
+                            return _errorWidget(snapshot.data.error);
+                          }
+                          return _movieDetail(snapshot.data);
+                        } else if (snapshot.hasError) {
+                          return _errorWidget(snapshot.error);
+                        } else {
+                          return Center(child: CircularProgressIndicator());
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : Center(child: Text('Oops! Check your internet connection.')),
     );
+  }
+
+  Widget _getGenre(GenreResponse data) {
+    List<Genre> _genre = data.genre;
+    if (_genre.length == 0) {
+      return Center(child: CircularProgressIndicator());
+    } else {
+      return ListView.builder(
+        shrinkWrap: true,
+        itemCount: _genre.length,
+        itemBuilder: (context, index) {
+          return Text('  - ${_genre[index].genre}',
+              style: TextStyle(fontSize: 15));
+        },
+      );
+    }
   }
 
   Widget _errorWidget(String error) {
@@ -78,14 +137,41 @@ class _DetailScreenState extends State<DetailScreen> {
     );
   }
 
-  Widget _movieDetail(DetailsResponse data) {
-    List<Details> _details = data.details;
-    if (_details.length == 0) {
-      return Center(child: Text('Loading...'));
+  Widget _movieDetail(CastResponse data) {
+    List<Cast> _cast = data.cast;
+    if (_cast.length == 0) {
+      return Center(child: CircularProgressIndicator());
     } else {
-      return Center(
-        child: Text(
-            "${_details[0].did} || ${_details[0].name} || ${_details[0].site}"),
+      return ListView.builder(
+        itemCount: _cast.length,
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Padding(
+                  padding: EdgeInsets.all(8),
+                  child: Container(
+                      decoration: BoxDecoration(
+                          shape: BoxShape.circle, color: Colors.grey),
+                      height: 70,
+                      width: 70,
+                      child: _cast[index].image != null
+                          ? Image(
+                              fit: BoxFit.fill,
+                              image: NetworkImage(
+                                  'https://image.tmdb.org/t/p/original/' +
+                                      _cast[index].image),
+                            )
+                          : Container()),
+                ),
+                Flexible(child: Text(_cast[index].name))
+              ],
+            ),
+          );
+        },
+        scrollDirection: Axis.horizontal,
       );
     }
   }
